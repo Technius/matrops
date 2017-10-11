@@ -1,3 +1,5 @@
+mod command;
+
 use cursive;
 use cursive::view::{Finder, ViewWrapper};
 use cursive::views;
