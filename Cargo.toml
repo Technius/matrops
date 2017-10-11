@@ -1,0 +1,7 @@
+[package]
+name = "matrixops"
+version = "0.1.0"
+authors = ["Bryan Tan <techniux@gmail.com>"]
+
+[dependencies]
+cursive = "0.6"
