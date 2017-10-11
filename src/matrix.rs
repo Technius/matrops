@@ -37,10 +37,10 @@ impl <T> Matrix<T> {
         }
     }
 
-    // pub fn get_row<'a>(&self, row: usize) -> &'a [i32] {
-    //     let start = (row - 1) * self.cols;
-    //     self.data.index([start..(start + self.cols)])
-    // }
+    pub fn get_row<'a>(&self, row: usize) -> Vec<T> where T: Clone {
+        let start = (row - 1) * self.cols;
+        self.data[start..(start + self.cols)].to_owned()
+    }
 
     pub fn set(&mut self, row: usize, col: usize, value: T) -> () {
         assert!(row <= self.rows && col <= self.cols && row > 0 && col > 0);
