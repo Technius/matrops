@@ -1,7 +1,7 @@
 extern crate matrixops;
 extern crate cursive;
 
-use cursive::{Cursive, Printer};
+use cursive::Cursive;
 use cursive::views;
 use cursive::view::{Finder, ViewWrapper};
 use cursive::traits::{Identifiable, View};
@@ -47,8 +47,7 @@ impl MatrixView {
         for (row_ind, row) in matrix.rows().iter().enumerate() {
             let mut rview = views::LinearLayout::horizontal();
             for (col_ind, value) in row.iter().enumerate() {
-                let value_str = value.to_string();
-                let cell = views::TextView::new(Self::pad_cell(&value.to_string(), max_width))
+                let cell = views::TextView::new(Self::cell_text(value, max_width))
                     .h_align(cursive::align::HAlign::Right)
                     .with_id(Self::cell_id(row_ind, col_ind));
                 rview.add_child(views::DummyView {});
@@ -71,11 +70,13 @@ impl MatrixView {
             .unwrap()
     }
 
-    fn pad_cell(s: &String, max_size: usize) -> String {
+    fn cell_text(value: &i32, max_size: usize) -> String {
+        let mut s = value.to_string();
         let padding = std::iter::repeat(" ")
             .take(max_size - s.len())
             .collect::<String>();
-        padding + s
+        s.push_str(&padding);
+        s
     }
 
     fn update(&mut self) {
@@ -85,7 +86,7 @@ impl MatrixView {
             for (col_ind, value) in row.iter().enumerate() {
                 let id = Self::cell_id(row_ind, col_ind);
                 self.underlying.find_id(&id, |view: &mut views::TextView| {
-                    view.set_content(Self::pad_cell(&value.to_string(), max_width));
+                    view.set_content(Self::cell_text(value, max_width));
                 });
             }
         }
