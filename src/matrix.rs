@@ -1,17 +1,18 @@
 use std::fmt;
-use std::ops::{Add, Index, IndexMut, Sub};
+use std::ops::{Add, IndexMut, Sub};
 
 #[derive(PartialEq, Debug, Clone)]
-pub struct Matrix {
-    data: Vec<i32>,
+/// Matrix that contains the specified data.
+pub struct Matrix<T> {
+    data: Vec<T>,
     pub rows: usize,
     pub cols: usize
 }
 
-impl Matrix {
+impl <T> Matrix<T> {
 
     /// Creates a matrix with the given size that contains the given data.
-    pub fn new(rows: usize, cols: usize, data: Vec<i32>) -> Matrix {
+    pub fn new(rows: usize, cols: usize, data: Vec<T>) -> Matrix<T> {
         assert!(data.len() == rows * cols);
         Matrix {
             data: data,
@@ -20,18 +21,19 @@ impl Matrix {
         }
     }
 
-    /// Creates a new matrix with the given size that contains only zeroes.
-    pub fn zero(rows: usize, cols: usize) -> Matrix {
-        Matrix::new(rows, cols, vec![0; rows * cols])
+    /// Creates a new matrix with the given size that contains the given value.
+    pub fn filled(rows: usize, cols: usize, default: T) -> Matrix<T>
+        where T: Clone {
+        Matrix::new(rows, cols, vec![default; rows * cols])
     }
 
     /// Gets the value in the specified row and column, if the row and column
     /// is contained in the matrix.
-    pub fn get(&self, row: usize, col: usize) -> Option<i32> {
+    pub fn get(&self, row: usize, col: usize) -> Option<T> where T: Clone {
         if row > self.rows || col > self.cols || row < 1 || col < 1 {
             None
         } else {
-            Some(self.data[(row - 1) * self.cols + (col - 1)])
+            Some(self.data[(row - 1) * self.cols + (col - 1)].clone())
         }
     }
 
@@ -40,34 +42,33 @@ impl Matrix {
     //     self.data.index([start..(start + self.cols)])
     // }
 
-    pub fn set(&mut self, row: usize, col: usize, value: i32) -> () {
+    pub fn set(&mut self, row: usize, col: usize, value: T) -> () {
         assert!(row <= self.rows && col <= self.cols && row > 0 && col > 0);
         self.data[(row - 1) * self.cols + (col - 1)] = value;
     }
 
-    pub fn set_row(&mut self, row: usize, values: &[i32]) -> () {
+    pub fn set_row(&mut self, row: usize, values: &[T]) -> () where T: Clone {
         assert!(row <= self.rows && values.len() <= self.cols && row > 0);
         let start = (row - 1) * self.cols;
         let slice = self.data.index_mut(start..(start + self.cols));
         for i in 0..slice.len() {
-            println!("{} {}", slice[i], values[i]);
-            slice[i] = values[i];
+            slice[i] = values[i].clone();
         }
     }
 
     /// Changes each element of the row in-place with the given function
     pub fn row_foreach<F>(&mut self, row: usize, cb: F) -> ()
-        where F: Fn(i32) -> i32
+        where F: Fn(&T) -> T
     {
         assert!(row <= self.rows && row > 0);
         let start = (row - 1) * self.cols;
         let slice = self.data.index_mut(start..(start + self.cols));
         for i in 0..slice.len() {
-            slice[i] = cb(slice[i]);
+            slice[i] = cb(&slice[i]);
         }
     }
 
-    pub fn rows(&self) -> Vec<Vec<i32>> {
+    pub fn rows(&self) -> Vec<Vec<T>> where T: Clone {
         self.data
             .chunks(self.cols)
             .map(|sl| sl.to_vec())
@@ -75,27 +76,27 @@ impl Matrix {
     }
 }
 
-impl <'a> Add for &'a Matrix {
-    type Output = Matrix;
+impl <'a, T: Add<T, Output = T> + Clone> Add for &'a Matrix<T> {
+    type Output = Matrix<T>;
 
-    fn add(self, rhs: &Matrix) -> Self::Output {
+    fn add(self, rhs: &Matrix<T>) -> Self::Output {
         assert!(self.rows == rhs.rows && self.cols == rhs.cols);
-        let new_data = self.data.iter().zip(&rhs.data).map(|(a, b)| a + b).collect();
+        let new_data = self.data.iter().zip(&rhs.data).map(|(a, b)| a.clone() + b.clone()).collect();
         Matrix::new(self.rows, self.cols, new_data)
     }
 }
 
-impl <'a> Sub for &'a Matrix {
-    type Output = Matrix;
+impl <'a, T: Sub<T, Output = T> + Clone> Sub for &'a Matrix<T> {
+    type Output = Matrix<T>;
 
-    fn sub(self, rhs: &Matrix) -> Self::Output {
+    fn sub(self, rhs: &Matrix<T>) -> Self::Output {
         assert!(self.rows == rhs.rows && self.cols == rhs.cols);
-        let new_data = self.data.iter().zip(&rhs.data).map(|(a, b)| a - b).collect();
+        let new_data = self.data.iter().zip(&rhs.data).map(|(a, b)| a.clone() - b.clone()).collect();
         Matrix::new(self.rows, self.cols, new_data)
     }
 }
 
-impl fmt::Display for Matrix {
+impl <T: Clone + fmt::Display> fmt::Display for Matrix<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut buf = String::new();
         for i in 1..(self.rows + 1) {
