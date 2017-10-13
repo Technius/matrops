@@ -9,6 +9,8 @@ pub struct Matrix<T> {
     pub cols: usize
 }
 
+pub type MatrixResult<T> = Result<T, String>;
+
 impl <T> Matrix<T> {
 
     /// Creates a matrix with the given size that contains the given data.
@@ -42,29 +44,50 @@ impl <T> Matrix<T> {
         self.data[start..(start + self.cols)].to_owned()
     }
 
-    pub fn set(&mut self, row: usize, col: usize, value: T) -> () {
-        assert!(row <= self.rows && col <= self.cols && row > 0 && col > 0);
-        self.data[(row - 1) * self.cols + (col - 1)] = value;
+    pub fn set(&mut self, row: usize, col: usize, value: T) -> MatrixResult<()> {
+        if row <= self.rows && col <= self.cols && row > 0 && col > 0 {
+            self.data[(row - 1) * self.cols + (col - 1)] = value;
+            Ok(())
+        } else {
+            Err(format!("{}, {} is out of bounds", row, col))
+        }
     }
 
-    pub fn set_row(&mut self, row: usize, values: &[T]) -> () where T: Clone {
-        assert!(row <= self.rows && values.len() <= self.cols && row > 0);
-        let start = (row - 1) * self.cols;
-        let slice = self.data.index_mut(start..(start + self.cols));
-        for i in 0..slice.len() {
-            slice[i] = values[i].clone();
+    pub fn set_row(&mut self, row: usize, values: &[T]) -> MatrixResult<()>
+        where T: Clone {
+        let mut errs = Vec::<String>::new();
+        if row > self.rows || row <= 0 {
+            errs.push(format!("row {} out of bounds", row));
+        }
+        if values.len() != self.cols {
+            errs.push(format!("value length does not match row length ({} != {})",
+                              values.len(), self.cols));
+        }
+        if errs.len() == 0 {
+            let start = (row - 1) * self.cols;
+            let slice = self.data.index_mut(start..(start + self.cols));
+            for i in 0..slice.len() {
+                slice[i] = values[i].clone();
+            }
+            Ok(())
+        } else {
+            Err("rip".to_owned())
         }
     }
 
     /// Changes each element of the row in-place with the given function
-    pub fn row_foreach<F>(&mut self, row: usize, cb: F) -> ()
+    pub fn row_foreach<F>(&mut self, row: usize, cb: F) -> MatrixResult<()>
         where F: Fn(&T) -> T
     {
-        assert!(row <= self.rows && row > 0);
-        let start = (row - 1) * self.cols;
-        let slice = self.data.index_mut(start..(start + self.cols));
-        for i in 0..slice.len() {
-            slice[i] = cb(&slice[i]);
+        if row <= self.rows && row > 0 {
+            let start = (row - 1) * self.cols;
+            let slice = self.data.index_mut(start..(start + self.cols));
+            for i in 0..slice.len() {
+                slice[i] = cb(&slice[i]);
+            }
+            Ok(())
+        } else {
+            Err(format!("row {} is not in bounds", row))
         }
     }
 

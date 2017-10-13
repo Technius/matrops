@@ -26,7 +26,7 @@ fn main() {
         s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
             let mat = &mut view.matrix;
             for row in 1..(mat.rows + 1) {
-                mat.row_foreach(row, |x| x * 2.0);
+                mat.row_foreach(row, |x| x * 2.0).unwrap();
             }
         });
     });
@@ -45,4 +45,9 @@ fn main() {
 fn open_number_dialog(s: &mut Cursive) {
     let popup = views::Dialog::text("Hello!").dismiss_button("Close me");
     s.screen_mut().add_layer_at(Position::new(Offset::Center, Offset::Parent(10)), popup);
+}
+
+fn open_error_popup(s: &mut Cursive, msg: String) {
+    let popup = views::Dialog::text(format!("Error: {}", msg)).dismiss_button("Close");
+    s.screen_mut().add_layer_at(Position::new(Offset::Center, Offset::Center), popup);
 }

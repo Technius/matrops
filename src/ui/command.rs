@@ -1,5 +1,5 @@
 use std::ops::{Add, Mul};
-use matrix::Matrix;
+use matrix::{Matrix, MatrixResult};
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum Command<T> {
@@ -8,10 +8,8 @@ pub enum Command<T> {
     SwapRow { row1: usize, row2: usize }
 }
 
-type Result<T> = ::std::result::Result<Matrix<T>, String>;
-
 impl <T> Command<T> {
-    pub fn apply(&self, matrix: &Matrix<T>) -> Matrix<T>
+    pub fn apply(&self, matrix: &Matrix<T>) -> MatrixResult<Matrix<T>>
         where T: Clone + Add<T, Output = T> + Mul<T, Output = T> {
         let mut copy = matrix.clone();
         let _: () = match self {
@@ -22,18 +20,18 @@ impl <T> Command<T> {
                     .zip(dest_row)
                     .map(|(s, d)| coeff.clone() * s.clone() + d)
                     .collect();
-                copy.set_row(dest, &new_dest);
+                copy.set_row(dest, &new_dest)?;
             },
             &Command::ScaleRow { ref coeff, row } => {
-                copy.row_foreach(row, |x| coeff.clone() * x.clone());
+                copy.row_foreach(row, |x| coeff.clone() * x.clone())?;
             },
             &Command::SwapRow { row1, row2 } => {
                 let r1 = matrix.get_row(row1);
                 let r2 = matrix.get_row(row2);
-                copy.set_row(row1, &r2);
-                copy.set_row(row2, &r1);
+                copy.set_row(row1, &r2)?;
+                copy.set_row(row2, &r1)?;
             }
         };
-        copy
+        Ok(copy)
     }
 }
