@@ -6,8 +6,10 @@ use cursive::views;
 use cursive::align::HAlign;
 use cursive::traits::{Identifiable, View};
 use std;
+use std::ops::{Add, Mul};
 
-use matrix::Matrix;
+use matrix::{Matrix, MatrixResult};
+use self::command::Command;
 
 pub struct MatrixView<T> {
     pub matrix: Matrix<T>,
@@ -35,6 +37,13 @@ impl <T: Clone + std::string::ToString> MatrixView<T> {
             matrix: matrix,
             underlying: row_views
         }
+    }
+
+    pub fn apply_command(&mut self, cmd: Command<T>) -> MatrixResult<()>
+        where T: Add<T, Output = T> + Mul<T, Output = T> {
+        let upd = cmd.apply(&self.matrix)?;
+        self.matrix = upd;
+        Ok(())
     }
 
     fn max_cell_size(matrix: &Matrix<T>) -> usize {
