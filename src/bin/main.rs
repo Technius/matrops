@@ -25,24 +25,22 @@ fn main() {
         9.0, -10.0, 3.0,
         42.0, 9.0, 0.0]))
         .with_id("matrix_view");
-    let mx2button = views::Button::new("All rows *2", |s| {
-        s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
-            let mat = &mut view.matrix;
-            for row in 1..(mat.rows + 1) {
-                mat.row_foreach(row, |x| x * 2.0).unwrap();
-            }
-        });
-    });
     let scale_button = views::Button::new("Scale row", scale_action);
+    let swap_button = views::Button::new("Swap rows", swap_action);
+    let add_button = views::Button::new("Add rows", add_action);
     let layout = views::LinearLayout::vertical()
         .child(mview)
-        .child(mx2button)
-        .child(scale_button);
+        .child(scale_button)
+        .child(swap_button)
+        .child(add_button);
     let diag = views::Dialog::new()
         .content(layout)
         .title("MatrixOps")
         .button("Quit", |s| s.quit());
-    let eview = views::OnEventView::new(diag).on_event('s', scale_action);
+    let eview = views::OnEventView::new(diag)
+        .on_event('s', scale_action)
+        .on_event('i', swap_action)
+        .on_event('a', add_action);
     siv.add_layer(eview);
     siv.run();
 }
@@ -55,6 +53,37 @@ fn scale_action(s: &mut Cursive) {
                 let _ = view.apply_command(Command::ScaleRow {
                     coeff: coeff,
                     row: row
+                });
+            });
+        });
+    });
+}
+
+fn swap_action(s: &mut Cursive) {
+    open_number_dialog(s, "First row?", |s, row1: usize| {
+        open_number_dialog(s, "Second row?", move |s, row2: usize| {
+            s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
+                // FIXME: error dialog
+                let _ = view.apply_command(Command::SwapRow {
+                    row1: row1,
+                    row2: row2
+                });
+            });
+        });
+    });
+}
+
+fn add_action(s: &mut Cursive) {
+    open_number_dialog(s, "Source row?", |s, src: usize| {
+        open_number_dialog(s, "Multiplied by?", move |s, coeff: f64| {
+            open_number_dialog(s, "Dest row?", move |s, dest: usize| {
+                s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
+                    // FIXME: error dialog
+                    let _ = view.apply_command(Command::AddRow {
+                        src: src,
+                        coeff: coeff,
+                        dest: dest
+                    });
                 });
             });
         });
