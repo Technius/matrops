@@ -15,7 +15,7 @@ fn command_add() {
         src: 2,
         dest: 1
     };
-    assert_eq!(cmd.apply(&m1), Matrix::new(3, 3, vec![
+    assert_eq!(cmd.apply(&m1).unwrap(), Matrix::new(3, 3, vec![
         1, 0, 0,
         0, 1, 0,
         0, 0, 1
@@ -33,7 +33,7 @@ fn command_swap() {
         row1: 1,
         row2: 2
     };
-    assert_eq!(cmd.apply(&m1), Matrix::new(3, 3, vec![
+    assert_eq!(cmd.apply(&m1).unwrap(), Matrix::new(3, 3, vec![
         1, 0, 0,
         0, 1, 0,
         0, 0, 1
@@ -51,7 +51,7 @@ fn command_scale() {
         coeff: 0.5,
         row: 1
     };
-    assert_eq!(cmd.apply(&m1), Matrix::new(3, 3, vec![
+    assert_eq!(cmd.apply(&m1).unwrap(), Matrix::new(3, 3, vec![
         1.0, 0.0, 0.0,
         0.0, 1.0, 0.0,
         0.0, 0.0, 1.0
