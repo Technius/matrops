@@ -3,6 +3,8 @@ name = "matrixops"
 version = "0.1.0"
 dependencies = [
  "cursive 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num-rational 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num-traits 0.1.40 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

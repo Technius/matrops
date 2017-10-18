@@ -5,3 +5,5 @@ authors = ["Bryan Tan <techniux@gmail.com>"]
 
 [dependencies]
 cursive = "0.6"
+num-rational = "*"
+num-traits = "*"

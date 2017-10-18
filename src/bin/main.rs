@@ -1,5 +1,7 @@
 extern crate matrixops;
 extern crate cursive;
+extern crate num_rational;
+extern crate num_traits;
 
 use std::str::FromStr;
 
@@ -12,6 +14,9 @@ use matrixops::matrix::Matrix;
 use matrixops::ui::MatrixView;
 use matrixops::ui::command::Command;
 
+use num_rational::Ratio;
+use num_traits::FromPrimitive;
+
 fn main() {
     let mut siv = Cursive::new();
 
@@ -20,10 +25,12 @@ fn main() {
     siv.screen_mut().add_layer_at(Position::new(
         Offset::Absolute(screen_size.x), Offset::Absolute(screen_size.y + 1)), status_bar);
 
-    let mview = MatrixView::<f64>::new(Matrix::new(3, 3, vec![
+    let data: Vec<f64> = vec![
         3.0, 2.0, 11.0,
         9.0, -10.0, 3.0,
-        42.0, 9.0, 0.0]))
+        42.0, 9.0, 0.0];
+    let mview = MatrixView::<Ratio<i64>>::new(Matrix::new(3, 3,
+        data.iter().map(|x| Ratio::<i64>::from_f64(x.clone()).unwrap()).collect()))
         .with_id("matrix_view");
     let scale_button = views::Button::new("Scale row", scale_action);
     let swap_button = views::Button::new("Swap rows", swap_action);
@@ -46,9 +53,9 @@ fn main() {
 }
 
 fn scale_action(s: &mut Cursive) {
-    open_number_dialog(s, "How much to scale by?", |s, coeff: f64| {
+    open_number_dialog(s, "How much to scale by?", |s, coeff: Ratio<i64>| {
         open_number_dialog(s, "Which row?", move |s, row: usize| {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
+            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::ScaleRow {
                     coeff: coeff,
@@ -62,7 +69,7 @@ fn scale_action(s: &mut Cursive) {
 fn swap_action(s: &mut Cursive) {
     open_number_dialog(s, "First row?", |s, row1: usize| {
         open_number_dialog(s, "Second row?", move |s, row2: usize| {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
+            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::SwapRow {
                     row1: row1,
@@ -75,9 +82,9 @@ fn swap_action(s: &mut Cursive) {
 
 fn add_action(s: &mut Cursive) {
     open_number_dialog(s, "Source row?", |s, src: usize| {
-        open_number_dialog(s, "Multiplied by?", move |s, coeff: f64| {
+        open_number_dialog(s, "Multiplied by?", move |s, coeff: Ratio<i64>| {
             open_number_dialog(s, "Dest row?", move |s, dest: usize| {
-                s.call_on_id("matrix_view", |view: &mut MatrixView<f64>| {
+                s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                     // FIXME: error dialog
                     let _ = view.apply_command(Command::AddRow {
                         src: src,
