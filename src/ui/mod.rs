@@ -19,6 +19,7 @@ pub struct MatrixView<T> {
 }
 
 impl <T: Clone + std::string::ToString> MatrixView<T> {
+
     pub fn new(matrix: Matrix<T>) -> Self {
         let mut row_views = views::LinearLayout::vertical();
         let max_width = Self::max_cell_size(&matrix);
@@ -30,10 +31,8 @@ impl <T: Clone + std::string::ToString> MatrixView<T> {
                 let cell = views::TextView::new(Self::cell_text(value, max_width))
                     .h_align(HAlign::Right)
                     .with_id(cell_id.as_str());
-                let event_view = views::OnEventView::new(cell)
-                    .on_event('e', move |s| Self::show_cell_edit_popup(s, &cell_id));
                 rview.add_child(views::DummyView {});
-                rview.add_child(event_view);
+                rview.add_child(cell);
             }
             row_views.add_child(rview);
         }
@@ -49,11 +48,6 @@ impl <T: Clone + std::string::ToString> MatrixView<T> {
         let upd = cmd.apply(&self.matrix)?;
         self.matrix = upd;
         Ok(())
-    }
-
-    fn show_cell_edit_popup(s: &mut Cursive, cell_id: &str) {
-        s.call_on_id(cell_id, |et: &mut views::EditView| {
-        });
     }
 
     fn max_cell_size(matrix: &Matrix<T>) -> usize {

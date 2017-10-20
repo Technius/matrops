@@ -77,7 +77,8 @@ fn show_edit_view(s: &mut Cursive, data: Matrix<Ratio<i64>>) {
     let eview = views::OnEventView::new(diag)
         .on_event('s', scale_action)
         .on_event('i', swap_action)
-        .on_event('a', add_action);
+        .on_event('a', add_action)
+        .on_event('e', edit_action);
     s.add_layer(eview);
 }
 
@@ -103,6 +104,22 @@ fn swap_action(s: &mut Cursive) {
                 let _ = view.apply_command(Command::SwapRow {
                     row1: row1,
                     row2: row2
+                });
+            });
+        });
+    });
+}
+
+fn edit_action(s: &mut Cursive) {
+    open_number_dialog(s, "Row?", |s, row: usize| {
+        open_number_dialog(s, "Col?", move |s, col: usize| {
+            open_number_dialog(s, "New value?", move |s, v: Ratio<i64>| {
+                s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+                    let _ = view.apply_command(Command::EditCell {
+                        row,
+                        col,
+                        value: v
+                    });
                 });
             });
         });

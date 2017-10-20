@@ -5,7 +5,8 @@ use matrix::{Matrix, MatrixResult};
 pub enum Command<T> {
     AddRow { coeff: T, src: usize, dest: usize },
     ScaleRow { coeff: T, row: usize },
-    SwapRow { row1: usize, row2: usize }
+    SwapRow { row1: usize, row2: usize },
+    EditCell { row: usize, col: usize, value: T }
 }
 
 impl <T> Command<T> {
@@ -30,6 +31,9 @@ impl <T> Command<T> {
                 let r2 = matrix.get_row(row2);
                 copy.set_row(row1, &r2)?;
                 copy.set_row(row2, &r1)?;
+            },
+            &Command::EditCell { row, col, ref value } => {
+                copy.set(row, col, value.clone())?;
             }
         };
         Ok(copy)
