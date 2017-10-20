@@ -1,11 +1,13 @@
 pub mod command;
 
 use cursive;
-use cursive::view::{Finder, ViewWrapper};
+use cursive::Cursive;
+use cursive::view::{Finder, ViewWrapper, Offset, Position};
 use cursive::views;
 use cursive::align::HAlign;
 use cursive::traits::{Identifiable, View};
 use std;
+use std::str::FromStr;
 use std::ops::{Add, Mul};
 
 use matrix::{Matrix, MatrixResult};
@@ -24,11 +26,14 @@ impl <T: Clone + std::string::ToString> MatrixView<T> {
         for (row_ind, row) in matrix.rows().iter().enumerate() {
             let mut rview = views::LinearLayout::horizontal();
             for (col_ind, value) in row.iter().enumerate() {
+                let cell_id = Self::cell_id(row_ind, col_ind);
                 let cell = views::TextView::new(Self::cell_text(value, max_width))
                     .h_align(HAlign::Right)
-                    .with_id(Self::cell_id(row_ind, col_ind));
+                    .with_id(cell_id.as_str());
+                let event_view = views::OnEventView::new(cell)
+                    .on_event('e', move |s| Self::show_cell_edit_popup(s, &cell_id));
                 rview.add_child(views::DummyView {});
-                rview.add_child(cell);
+                rview.add_child(event_view);
             }
             row_views.add_child(rview);
         }
@@ -44,6 +49,11 @@ impl <T: Clone + std::string::ToString> MatrixView<T> {
         let upd = cmd.apply(&self.matrix)?;
         self.matrix = upd;
         Ok(())
+    }
+
+    fn show_cell_edit_popup(s: &mut Cursive, cell_id: &str) {
+        s.call_on_id(cell_id, |et: &mut views::EditView| {
+        });
     }
 
     fn max_cell_size(matrix: &Matrix<T>) -> usize {
@@ -98,4 +108,33 @@ impl <T: Clone + ToString> ViewWrapper for MatrixView<T> {
         where F: FnOnce(&mut Self::V) -> R {
         Some(f(&mut self.underlying))
     }
+}
+
+/// Opens a dialog that prompts for a number, and then calls the callback
+/// with the entered number.
+/// FIXME: Write a wrapper that makes chaining easier
+pub fn open_number_dialog<F, S: Into<String>, T>(s: &mut Cursive, msg: S, callback: F)
+    where F: 'static + Fn(&mut Cursive, T),
+          T: FromStr + Copy + Clone {
+    let edit_text = views::EditView::new()
+        .on_submit(move |s, txt| {
+            match T::from_str(txt) {
+                Ok(n) => {
+                    s.pop_layer();
+                    callback(s, n);
+                },
+                Err(_) => {
+                    open_error_popup(s, "Please enter a number.");
+                }
+            }
+        });
+    let popup = views::Dialog::around(edit_text)
+        .title(msg)
+        .dismiss_button("Cancel");
+    s.screen_mut().add_layer_at(Position::new(Offset::Center, Offset::Parent(10)), popup);
+}
+
+pub fn open_error_popup<S: std::fmt::Display>(s: &mut Cursive, msg: S) {
+    let popup = views::Dialog::text(format!("Error: {}", msg)).dismiss_button("Close");
+    s.screen_mut().add_layer_at(Position::new(Offset::Center, Offset::Center), popup);
 }
