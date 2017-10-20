@@ -25,13 +25,45 @@ fn main() {
     siv.screen_mut().add_layer_at(Position::new(
         Offset::Absolute(screen_size.x), Offset::Absolute(screen_size.y + 1)), status_bar);
 
-    let data: Vec<f64> = vec![
-        3.0, 2.0, 11.0,
-        9.0, -10.0, 3.0,
-        42.0, 9.0, 0.0];
-    let mview = MatrixView::<Ratio<i64>>::new(Matrix::new(3, 3,
-        data.iter().map(|x| Ratio::<i64>::from_f64(x.clone()).unwrap()).collect()))
-        .with_id("matrix_view");
+    show_setup_view(&mut siv);
+    siv.run();
+
+}
+
+fn show_setup_view(s: &mut Cursive) {
+    let row_text = views::EditView::new().with_id("rows");
+    let col_text = views::EditView::new().with_id("columns");
+    let setup_pane = views::ListView::new()
+        .child("Rows", row_text)
+        .child("Columns", col_text);
+    let setup_dialog = views::Dialog::around(setup_pane)
+        .title("Enter matrix dimensions")
+        .button("Go", |s| {
+            let rt = s.find_id::<views::EditView>("rows").expect("Can't find row EditText");
+            let ct = s.find_id::<views::EditView>("columns").expect("Can't find col EditText");
+            let rows = usize::from_str(&*rt.get_content());
+            let cols = usize::from_str(&*ct.get_content());
+
+            let mut show_error = true;
+            if let (Ok(rows), Ok(cols)) = (rows, cols) {
+                if rows > 0 && cols > 0 {
+                    let data = vec![Ratio::from_i64(0).unwrap(); rows * cols];
+                    let matrix = Matrix::new(rows, cols, data);
+                    s.pop_layer();
+                    show_edit_view(s, matrix);
+                    show_error = false;
+                }
+            }
+
+            if show_error {
+                open_error_popup(s, "Please enter positive integers");
+            }
+        });
+    s.add_layer(setup_dialog);
+}
+
+fn show_edit_view(s: &mut Cursive, data: Matrix<Ratio<i64>>) {
+    let mview = MatrixView::<Ratio<i64>>::new(data).with_id("matrix_view");
     let scale_button = views::Button::new("Scale row", scale_action);
     let swap_button = views::Button::new("Swap rows", swap_action);
     let add_button = views::Button::new("Add rows", add_action);
@@ -48,8 +80,7 @@ fn main() {
         .on_event('s', scale_action)
         .on_event('i', swap_action)
         .on_event('a', add_action);
-    siv.add_layer(eview);
-    siv.run();
+    s.add_layer(eview);
 }
 
 fn scale_action(s: &mut Cursive) {
