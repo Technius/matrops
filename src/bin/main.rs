@@ -53,8 +53,8 @@ fn main() {
 }
 
 fn scale_action(s: &mut Cursive) {
-    open_number_dialog(s, "How much to scale by?", |s, coeff: Ratio<i64>| {
-        open_number_dialog(s, "Which row?", move |s, row: usize| {
+    open_number_dialog(s, "Which row?", |s, row: usize| {
+        open_number_dialog(s, "How much to scale by?", move |s, coeff: Ratio<i64>| {
             s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::ScaleRow {
