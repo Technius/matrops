@@ -1,12 +1,18 @@
+#[macro_use]
 extern crate matrixops;
 extern crate cursive;
 
 use cursive::Cursive;
 
-use matrixops::ui::NumberDialog;
-
 #[test]
 fn compile_test() {
-    let nd = NumberDialog::new("foo", |_, value: i32| {
-    });
+    let s: &mut Cursive = &mut Cursive::new();
+    number_dialog_chain!(s, {
+        a: usize =? "get a";
+        b: usize =? "get b";
+        callback {
+            let _ = s;
+            a + b + 1
+        }
+    })
 }

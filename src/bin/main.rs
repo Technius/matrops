@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate matrixops;
 extern crate cursive;
 extern crate num_rational;
@@ -12,9 +13,8 @@ use num_traits::FromPrimitive;
 use std::str::FromStr;
 
 use matrixops::matrix::Matrix;
-use matrixops::ui::{open_error_popup, open_number_dialog, MatrixView};
+use matrixops::ui::{open_error_popup, MatrixView};
 use matrixops::ui::command::Command;
-use matrixops::ui::NumberDialog;
 
 fn main() {
     let mut siv = Cursive::new();
@@ -84,8 +84,10 @@ fn show_edit_view(s: &mut Cursive, data: Matrix<Ratio<i64>>) {
 }
 
 fn scale_action(s: &mut Cursive) {
-    NumberDialog::new("Which row?", |s, row: usize| {
-        NumberDialog::new("How much to scale by?", move |s, coeff: Ratio<i64>| {
+    number_dialog_chain!(s, {
+        row: usize =? "Which row?";
+        coeff: Ratio<i64> =? "How much to scale by?";
+        callback {
             s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::ScaleRow {
@@ -93,13 +95,15 @@ fn scale_action(s: &mut Cursive) {
                     row: row
                 });
             });
-        }).show(s);
-    }).show(s);
+        }
+    });
 }
 
 fn swap_action(s: &mut Cursive) {
-    open_number_dialog(s, "First row?", |s, row1: usize| {
-        open_number_dialog(s, "Second row?", move |s, row2: usize| {
+    number_dialog_chain!(s, {
+        row1: usize =? "First row?";
+        row2: usize =? "Second row?";
+        callback {
             s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::SwapRow {
@@ -107,40 +111,42 @@ fn swap_action(s: &mut Cursive) {
                     row2: row2
                 });
             });
-        });
+        }
     });
 }
 
 fn edit_action(s: &mut Cursive) {
-    open_number_dialog(s, "Row?", |s, row: usize| {
-        open_number_dialog(s, "Col?", move |s, col: usize| {
-            open_number_dialog(s, "New value?", move |s, v: Ratio<i64>| {
-                s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                    let _ = view.apply_command(Command::EditCell {
-                        row,
-                        col,
-                        value: v
-                    });
+    number_dialog_chain!(s, {
+        row: usize =? "Row?";
+        col: usize =? "Col?";
+        v: Ratio<i64> =? "New value?";
+        callback {
+            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+                let _ = view.apply_command(Command::EditCell {
+                    row,
+                    col,
+                    value: v
                 });
             });
-        });
+        }
     });
 }
 
 fn add_action(s: &mut Cursive) {
-    open_number_dialog(s, "Source row?", |s, src: usize| {
-        open_number_dialog(s, "Multiplied by?", move |s, coeff: Ratio<i64>| {
-            open_number_dialog(s, "Dest row?", move |s, dest: usize| {
-                s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                    // FIXME: error dialog
-                    let _ = view.apply_command(Command::AddRow {
-                        src: src,
-                        coeff: coeff,
-                        dest: dest
-                    });
+    number_dialog_chain!(s, {
+        src: usize =? "Source row?";
+        coeff: Ratio<i64> =? "Multiplied by?";
+        dest: usize =? "Dest row?";
+        callback {
+            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+                // FIXME: error dialog
+                let _ = view.apply_command(Command::AddRow {
+                    src: src,
+                    coeff: coeff,
+                    dest: dest
                 });
             });
-        });
+        }
     });
 }
 

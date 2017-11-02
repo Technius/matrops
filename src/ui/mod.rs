@@ -1,9 +1,7 @@
 pub mod command;
 mod matrix_view;
-mod number_dialog;
 
 pub use self::matrix_view::MatrixView;
-pub use self::number_dialog::NumberDialog;
 
 use cursive::Cursive;
 use cursive::view::{Offset, Position};
@@ -38,4 +36,31 @@ pub fn open_number_dialog<F, S: Into<String>, T>(s: &mut Cursive, msg: S, callba
 pub fn open_error_popup<S: std::fmt::Display>(s: &mut Cursive, msg: S) {
     let popup = views::Dialog::text(format!("Error: {}", msg)).dismiss_button("Close");
     s.screen_mut().add_layer_at(Position::new(Offset::Center, Offset::Center), popup);
+}
+
+/// A small DSL for chaining multiple number dialogs.
+///
+/// Example:
+/// ```
+/// use cursive::Cursive;
+/// use cursive::views::Dialog;
+///
+/// let s: &mut Cursive = &mut Cursive::new();
+/// number_dialog_chain!(s, {
+///     a: usize =? "Prompt 1"
+///     b: usize =? "Prompt 2"
+///     callback {
+///         s.add_layer(Dialog::text(format!("a: {}, b: {}", a, b)).dismiss_button("Close"));
+///     }
+/// });
+/// ```
+#[macro_export]
+macro_rules! number_dialog_chain {
+    ($s:ident, { $name:ident : $ty:ty =? $msg:expr; $($t: tt)* }) => {
+        matrixops::ui::open_number_dialog($s, $msg, move |$s: &mut Cursive, $name: $ty| {
+            number_dialog_chain!($s, { $($t)* })
+        });
+    };
+    ($s:ident, { callback $stats:block }) => {{ $stats; () }};
+    ($s:ident, ) => ()
 }
