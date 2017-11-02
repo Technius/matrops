@@ -14,6 +14,7 @@ use std::str::FromStr;
 use matrixops::matrix::Matrix;
 use matrixops::ui::{open_error_popup, open_number_dialog, MatrixView};
 use matrixops::ui::command::Command;
+use matrixops::ui::NumberDialog;
 
 fn main() {
     let mut siv = Cursive::new();
@@ -83,8 +84,8 @@ fn show_edit_view(s: &mut Cursive, data: Matrix<Ratio<i64>>) {
 }
 
 fn scale_action(s: &mut Cursive) {
-    open_number_dialog(s, "Which row?", |s, row: usize| {
-        open_number_dialog(s, "How much to scale by?", move |s, coeff: Ratio<i64>| {
+    NumberDialog::new("Which row?", |s, row: usize| {
+        NumberDialog::new("How much to scale by?", move |s, coeff: Ratio<i64>| {
             s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
                 // FIXME: error dialog
                 let _ = view.apply_command(Command::ScaleRow {
@@ -92,8 +93,8 @@ fn scale_action(s: &mut Cursive) {
                     row: row
                 });
             });
-        });
-    });
+        }).show(s);
+    }).show(s);
 }
 
 fn swap_action(s: &mut Cursive) {

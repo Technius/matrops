@@ -1,7 +1,9 @@
 pub mod command;
 mod matrix_view;
+mod number_dialog;
 
 pub use self::matrix_view::MatrixView;
+pub use self::number_dialog::NumberDialog;
 
 use cursive::Cursive;
 use cursive::view::{Offset, Position};
