@@ -87,15 +87,13 @@ fn scale_action(s: &mut Cursive) {
     number_dialog_chain!(s, {
         row: usize =? "Which row?";
         coeff: Ratio<i64> =? "How much to scale by?";
-        callback {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                // FIXME: error dialog
-                let _ = view.apply_command(Command::ScaleRow {
-                    coeff: coeff,
-                    row: row
-                });
+        s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+            // FIXME: error dialog
+            let _ = view.apply_command(Command::ScaleRow {
+                coeff: coeff,
+                row: row
             });
-        }
+        });
     });
 }
 
@@ -103,15 +101,13 @@ fn swap_action(s: &mut Cursive) {
     number_dialog_chain!(s, {
         row1: usize =? "First row?";
         row2: usize =? "Second row?";
-        callback {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                // FIXME: error dialog
-                let _ = view.apply_command(Command::SwapRow {
-                    row1: row1,
-                    row2: row2
-                });
+        s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+            // FIXME: error dialog
+            let _ = view.apply_command(Command::SwapRow {
+                row1: row1,
+                row2: row2
             });
-        }
+        });
     });
 }
 
@@ -120,15 +116,13 @@ fn edit_action(s: &mut Cursive) {
         row: usize =? "Row?";
         col: usize =? "Col?";
         v: Ratio<i64> =? "New value?";
-        callback {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                let _ = view.apply_command(Command::EditCell {
-                    row,
-                    col,
-                    value: v
-                });
+        s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+            let _ = view.apply_command(Command::EditCell {
+                row,
+                col,
+                value: v
             });
-        }
+        });
     });
 }
 
@@ -137,16 +131,14 @@ fn add_action(s: &mut Cursive) {
         src: usize =? "Source row?";
         coeff: Ratio<i64> =? "Multiplied by?";
         dest: usize =? "Dest row?";
-        callback {
-            s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
-                // FIXME: error dialog
-                let _ = view.apply_command(Command::AddRow {
-                    src: src,
-                    coeff: coeff,
-                    dest: dest
-                });
+        s.call_on_id("matrix_view", |view: &mut MatrixView<Ratio<i64>>| {
+            // FIXME: error dialog
+            let _ = view.apply_command(Command::AddRow {
+                src: src,
+                coeff: coeff,
+                dest: dest
             });
-        }
+        });
     });
 }
 

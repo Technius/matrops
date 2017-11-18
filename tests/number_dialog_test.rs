@@ -10,9 +10,7 @@ fn compile_test() {
     number_dialog_chain!(s, {
         a: usize =? "get a";
         b: usize =? "get b";
-        callback {
-            let _ = s;
-            a + b + 1
-        }
+        let _ = s;
+        println!("{}", a + b + 1);
     })
 }

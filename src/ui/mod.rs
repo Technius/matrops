@@ -49,18 +49,21 @@ pub fn open_error_popup<S: std::fmt::Display>(s: &mut Cursive, msg: S) {
 /// number_dialog_chain!(s, {
 ///     a: usize =? "Prompt 1"
 ///     b: usize =? "Prompt 2"
-///     callback {
-///         s.add_layer(Dialog::text(format!("a: {}, b: {}", a, b)).dismiss_button("Close"));
-///     }
+///     s.add_layer(Dialog::text(format!("a: {}, b: {}", a, b)).dismiss_button("Close"));
 /// });
 /// ```
 #[macro_export]
 macro_rules! number_dialog_chain {
-    ($s:ident, { $name:ident : $ty:ty =? $msg:expr; $($t: tt)* }) => {
+    ($s:ident, { $name:ident : $ty:ty =? $msg:expr; $($rest: tt)* }) => {
         matrixops::ui::open_number_dialog($s, $msg, move |$s: &mut Cursive, $name: $ty| {
-            number_dialog_chain!($s, { $($t)* })
+            number_dialog_chain!($s, { $($rest)* })
         });
     };
-    ($s:ident, { callback $stats:block }) => {{ $stats; () }};
-    ($s:ident, ) => ()
+    ($s:ident, { $first:stmt; $($rest: tt)* }) => {
+        {
+            $first;
+            number_dialog_chain!($s, { $($rest)* });
+        }
+    };
+    ($s:ident, {}) => ();
 }
