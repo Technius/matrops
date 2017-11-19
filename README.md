@@ -7,6 +7,8 @@ Matrops is a terminal-based matrix row manipulation tool.
 * Press `s` to multiply a row by a *s*calar
 * Press `i` to *i*nterchange two rows
 * Press `a` to *a*dd a multiple of a row to another row
+* Press `e` to edit one cell.
+* Press `E` to edit a row.
 
 ## License
 

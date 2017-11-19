@@ -6,7 +6,8 @@ pub enum Command<T> {
     AddRow { coeff: T, src: usize, dest: usize },
     ScaleRow { coeff: T, row: usize },
     SwapRow { row1: usize, row2: usize },
-    EditCell { row: usize, col: usize, value: T }
+    EditCell { row: usize, col: usize, value: T },
+    EditRow { row: usize, values: Vec<T> }
 }
 
 impl <T> Command<T> {
@@ -34,6 +35,9 @@ impl <T> Command<T> {
             },
             &Command::EditCell { row, col, ref value } => {
                 copy.set(row, col, value.clone())?;
+            },
+            &Command::EditRow { row, ref values } => {
+                copy.set_row(row, &*values)?;
             }
         };
         Ok(copy)
